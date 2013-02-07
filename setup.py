@@ -1,9 +1,9 @@
 from setuptools import setup, find_packages
 import os
 
-version = open(os.path.join("akorn", "scrapers", "version.txt")).read().strip()
+version = open(os.path.join("akorn", "celery", "version.txt")).read().strip()
 
-setup(name='akorn.scrapers',
+setup(name='akorn.celery',
       version=version,
       description="",
       classifiers=[
