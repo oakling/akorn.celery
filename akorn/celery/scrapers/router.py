@@ -3,8 +3,9 @@ import urllib2
 import cookielib
 import pkgutil
 import urlparse
-import utils
-from utils import RedirectHandler, Ignore401Handler
+from akorn.scrapers.journals import utils
+from akorn.scrapers.journals.utils import RedirectHandler, Ignore401Handler
+from akorn.scrapers.journals.utils import get_scrapers_folder
 from couch import db_store, db_journals, db_scrapers
 
 def resolve_doi(doi):
@@ -50,7 +51,7 @@ def discover_scrapers():
   scraper_modules = []
   scraper_domain_map = {}
 
-  d = os.path.dirname(__file__)
+  d = get_scrapers_folder()
 
   for module_importer, name, ispkg in pkgutil.iter_modules([d,]):
     if not name.startswith('scrape_'):
