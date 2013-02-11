@@ -1,5 +1,5 @@
 # Exclude the egg info folder, as this is dynamically generated
-akorn.scrapers.egg-info
+akorn.celery.egg-info
 
 # Exclude compiled files
 *.pyc
