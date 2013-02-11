@@ -132,6 +132,13 @@ CELERYBEAT_SCHEDULE = {
                 ],
                )
     },
+    "John_Hopkins_feeds": {
+        "task": "akorn.scrapers.feeds.tasks.fetch_feed",
+        "schedule": crontab(minute=1, hour="*"),
+        "args":("john_hopkins_feed",
+                ["http://feeds.muse.jhu.edu/journals/american_journal_of_mathematics/latest_articles.xml"],
+               )
+    },
     "Nature_feeds": {
         "task": "lib.scrapers.feeds.tasks.fetch_feed",
         "schedule": crontab(minute=1, hour="*"),
