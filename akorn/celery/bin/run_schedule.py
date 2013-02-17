@@ -17,3 +17,6 @@ task = module.__dict__[task_name]
 
 task(*sched_task['args'])
 
+def main():
+    pass
+

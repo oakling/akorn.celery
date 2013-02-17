@@ -29,3 +29,6 @@ for sched_name, sched_task in celeryconfig.CELERYBEAT_SCHEDULE.items():
   else:
     task()
 
+def main():
+    pass
+

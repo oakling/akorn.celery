@@ -23,6 +23,8 @@ setup(name='akorn.celery',
           'setuptools',
       ],
       entry_points="""
-      # -*- Entry points: -*-
+          [console_scripts]
+          run_schedule = akorn.celery.bin.run_schedule:main
+          run_all_schedule = akorn.celery.bin.run_all_schedule:main
       """,
 )
