@@ -28,7 +28,7 @@ CELERYBEAT_SCHEDULE = {
        "schedule": crontab(minute="*/15"),
     },
     "APS_feeds": {
-        "task": "lib.scrapers.feeds.tasks.fetch_feed",
+        "task": "akorn.celery.feeds.tasks.fetch_feed",
         "schedule": crontab(minute=1, hour="15"),
         "args":("aps_feed",
                 ["http://feeds.aps.org/rss/recent/prl.xml",
@@ -42,14 +42,14 @@ CELERYBEAT_SCHEDULE = {
                )
     },
     "ACS_feeds": {
-        "task": "lib.scrapers.feeds.tasks.fetch_feed",
+        "task": "akorn.celery.feeds.tasks.fetch_feed",
         "schedule": crontab(minute=1, hour="15"),
         "args":("acs_feed",
                 ["http://feeds.feedburner.com/acs/jacsat"],
                )
     },
     "IOP_feeds":{
-        "task": "lib.scrapers.feeds.tasks.fetch_feed",
+        "task": "akorn.celery.feeds.tasks.fetch_feed",
         "schedule": crontab(minute=5, hour="12"),
         "args":("iop_feed",
                 [
@@ -108,7 +108,7 @@ CELERYBEAT_SCHEDULE = {
         )
     },
     "arxiv_feeds": {
-        "task": "lib.scrapers.feeds.tasks.fetch_feed",
+        "task": "akorn.celery.feeds.tasks.fetch_feed",
         "schedule": crontab(minute=10, hour="0"),
         "args":("arxiv_feed",
                 ['http://export.arxiv.org/rss/astro-ph',
@@ -133,21 +133,21 @@ CELERYBEAT_SCHEDULE = {
                )
     },
     "John_Hopkins_feeds": {
-        "task": "akorn.scrapers.feeds.tasks.fetch_feed",
+        "task": "akorn.celery.feeds.tasks.fetch_feed",
         "schedule": crontab(minute=1, hour="*"),
         "args":("john_hopkins_feed",
                 ["http://feeds.muse.jhu.edu/journals/american_journal_of_mathematics/latest_articles.xml"],
                )
     },
     "Nature_feeds": {
-        "task": "lib.scrapers.feeds.tasks.fetch_feed",
+        "task": "akorn.celery.feeds.tasks.fetch_feed",
         "schedule": crontab(minute=1, hour="*"),
         "args":("nature_feed",
                 ["http://feeds.nature.com/NatureLatestResearch"],
                )
     },
     "Wiley_feeds": {
-        "task": "lib.scrapers.feeds.tasks.fetch_feed",
+        "task": "akorn.celery.feeds.tasks.fetch_feed",
         "schedule": crontab(minute=5, hour="12"),
         "args":("wiley_feed",
                 ["feed://onlinelibrary.wiley.com/rss/journal/10.1111/(ISSN)1365-2966",
