@@ -76,10 +76,11 @@ def check_source(url):
 
 @task
 def scrape_journal(url, doc_id=None, base_article={}):
-    """Find the paper in the database and then add or merge as necessary."""
+    """Find the paper in the database and then add or merge as
+    necessary."""
 
-    # check the store for this source url
-    error = None
+    # TODO: Make sure that if doc_id is not None, it does actually
+    # refer to a document in the database.
 
     # Scrape if we have a doc_id or it hasn't already been scraped
     # always scrape if we're given a doc_id
@@ -91,30 +92,27 @@ def scrape_journal(url, doc_id=None, base_article={}):
         else:
           article = {}
            
-        try:
-          scraped_article = resolve_and_scrape(url)
+        scraped_article = resolve_and_scrape(url)
 
-          # If we haven't excepted at this point, clear the current article and save it
-          article.clear()
-          article.update(base_article)
-          article.update(scraped_article)
+        # clear the current article and save it
+        article.clear()
+        article.update(base_article)
+        article.update(scraped_article)
 
-          # Add the id and revision back in since we just cleared the doc. Awkward.
-          if doc_id:
-            article['_id'] = doc_id
-            article['_rev'] = rev_id
-        except Exception, e:
-          # Make a doc to remember to rescrape later
-          article['error'] = str(type(e)) + ': ' + str(e)
-          article['source_urls'] = [url]
-          article['rescrape'] = True
+        # Add the id and revision back in since we just cleared the
+        # doc. Awkward.
+        if doc_id:
+          article['_id'] = doc_id
+          article['_rev'] = rev_id
 
-        if article:
-          # check this hasn't been inadvertantly scraped already before we go
-          if check_source(article['source_urls'][-1]):
+        # If we haven't explicitly asked for the article to be scraped
+        # by providing a doc_id, then check that it hasn't been
+        # inadvertantly scraped already before we go
+        if doc_id is not None or check_source(article['source_urls'][-1]):
             doc_id, _ = db_store.save(article)
     else:
-        # we've already scraped this url. there should only be one such doc.
+        # we've already scraped this url. there should only be one
+        # such doc.
         rows = db_store.view('index/sources', key=url, include_docs='true').rows
         article = rows[0].doc
         doc_id = article.id

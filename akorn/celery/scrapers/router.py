@@ -68,41 +68,38 @@ def discover_scrapers():
 
 scraper_modules, scraper_domain_map = discover_scrapers()
 
+def get_domain(url):
+  url_parsed = urlparse.urlparse(url)
+  return url_parsed.netloc
+
 def resolve_scraper(url):
   # Do it by domain for now. This might not always work, a full url prefix might be needed, but this is cheaper.
-  url_parsed = urlparse.urlparse(url)
-  domain = url_parsed.netloc
 
-  #records = db_scrapers.view('index/domain', key=domain, include_docs='true').rows
-
-  #if not records:
-  #  return None
-  #else:
-  #  return records[0].doc
+  domain = get_domain(url)
 
   if domain in scraper_domain_map:
-    return scraper_domain_map[domain]
+    scraper_module = scraper_domain_map[domain]
   else:
-    return None
+    url = resolve_url(url)
+    domain = get_domain(url)
+    if domain in scraper_domain_map:
+      scraper_module = scraper_domain_map[domain]
+    else:
+      scraper_module = load_module('scrape_meta_tags')
+
+  module_path = "akorn.scrapers.journals." + scraper_module.__name__
+
+  return module_path, scraper_module
 
 def resolve_and_scrape(url):
-    """Scrape the journal page and add to database."""
+  """Scrape URL; handle any errors; return dictionary to be inserted
+  into store."""
 
-    scraper_module = resolve_scraper(url)
+  module_path, scraper_module = resolve_scraper(url)
 
-    if scraper_module is None:
-      url = resolve_url(url)
-      scraper_module = resolve_scraper(url)
-   
-      if scraper_module is None: 
-          # default to meta tags
-          scraper_module = load_module('scrape_meta_tags')
-
-    module_path = "akorn.scrapers.journals." + scraper_module.__name__
-
+  article={}
+  try:
     article = scraper_module.scrape(url)
-    
-    article['scraper_module'] = module_path 
 
     if 'journal' in article:
       journal_name = article['journal']
@@ -118,6 +115,12 @@ def resolve_and_scrape(url):
 
       if journal_id:
         article['journal_id'] = journal_id
+  except Exception, e:
+    article['error'] = str(type(e)) + ': ' + str(e)
+    article['source_urls'] = [url]
+    article['rescrape'] = True
+    
+  article['scraper_module'] = module_path 
 
-    return article
+  return article
 
