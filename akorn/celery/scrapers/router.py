@@ -95,10 +95,10 @@ def resolve_and_scrape(url):
   """Scrape URL; handle any errors; return dictionary to be inserted
   into store."""
 
-  module_path, scraper_module = resolve_scraper(url)
-
+  module_path = "Unable to resolve"
   article={}
   try:
+    module_path, scraper_module = resolve_scraper(url)
     article = scraper_module.scrape(url)
 
     if 'journal' in article:
@@ -123,4 +123,3 @@ def resolve_and_scrape(url):
   article['scraper_module'] = module_path 
 
   return article
-
