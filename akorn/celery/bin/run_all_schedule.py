@@ -25,7 +25,7 @@ for sched_name, sched_task in celeryconfig.CELERYBEAT_SCHEDULE.items():
   task = module.__dict__[task_name]
 
   if 'args' in sched_task:
-    task(*sched_task['args'])
+    task.delay(*sched_task['args'])
   else:
     task()
 
