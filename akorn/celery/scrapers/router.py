@@ -116,7 +116,8 @@ def resolve_and_scrape(url):
       if journal_id:
         article['journal_id'] = journal_id
   except Exception, e:
-    article['error'] = str(type(e)) + ': ' + str(e)
+    article['exception'] = str(type(e))
+    article['error_text'] = str(e)
     article['source_urls'] = [url]
     article['rescrape'] = True
     
