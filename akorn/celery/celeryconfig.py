@@ -8,15 +8,14 @@ BROKER_URL = "amqplib://akorn:akorn@127.0.0.1/myvhost" #amqplib://akorn:akorn@ip
 #BROKER_PASSWORD = "flout29&UFOs"
 #BROKER_VHOST = "myvhost"
 
-CELERY_RESULT_BACKEND = "amqp"
+CELERY_RESULT_BACKEND = None
 
 #BROKER_URL = "couchdb://127.0.0.1:5984/celery"
 #CELERY_RESULT_BACKEND = 'couchdb'
 
 CELERY_IMPORTS = (
-    "lib.scrapers.journals.tasks",
-    "lib.scrapers.feeds.tasks",
-    "lib.debug",
+    "akorn.celery.scrapers.tasks",
+    "akorn.celery.feeds.tasks",
 )
 
 CELERY_ENABLE_UTN = True
