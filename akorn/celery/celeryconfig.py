@@ -22,10 +22,6 @@ CELERY_ENABLE_UTN = True
 CELERY_TIMEZONE = "Europe/London"
 
 CELERYBEAT_SCHEDULE = {
-    "debug": {
-       "task": "lib.debug.rabbit_beat",
-       "schedule": crontab(minute="*/15"),
-    },
     "APS_feeds": {
         "task": "akorn.celery.feeds.tasks.fetch_feed",
         "schedule": crontab(minute=1, hour="15"),
