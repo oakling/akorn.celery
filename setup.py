@@ -22,6 +22,7 @@ setup(name='akorn.celery',
       install_requires=[
           'setuptools',
       ],
+      scripts=['scripts/run_all_schedule.py', 'scripts/run_schedule.py'],
       entry_points="""
           [console_scripts]
           run_schedule = akorn.celery.bin.run_schedule:main
