@@ -1,7 +1,7 @@
 import couchdb
-import akorn.local_settings
+import akorn.celery.local_settings
 
-server = couchdb.Server(akorn.local_settings.COUCH_SERVER)
+server = couchdb.Server(akorn.celery.local_settings.COUCH_SERVER)
 
 def get_db(db):
   try:

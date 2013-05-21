@@ -6,7 +6,7 @@ import urlparse
 from akorn.scrapers.journals import utils
 from akorn.scrapers.journals.utils import RedirectHandler, Ignore401Handler
 from akorn.scrapers.journals.utils import get_scrapers_folder
-from akorn.couch import db_store, db_journals, db_scrapers
+from akorn.celery.couch import db_store, db_journals, db_scrapers
 
 def resolve_doi(doi):
   cookiejar = cookielib.CookieJar()

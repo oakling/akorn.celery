@@ -1,4 +1,4 @@
-from akorn.couch import db_store
+from akorn.celery.couch import db_store
 from celery.task import task
 from router import resolve_and_scrape, resolve_doi
 

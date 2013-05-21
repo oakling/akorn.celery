@@ -3,7 +3,7 @@ from akorn.celery.scrapers.tasks import scrape_journal
 import feed_handlers
 import feedparser
 
-from akorn.couch import db_store
+from akorn.celery.couch import db_store
 
 @task
 def fetch_feed(feedhandler, feed_urls):
