@@ -9,3 +9,5 @@ akorn.celery.egg-info
 
 *.py~
 
+local_settings.py
+celerybeat-schedule
