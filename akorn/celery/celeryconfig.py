@@ -1,6 +1,6 @@
 from celery.schedules import crontab
 
-BROKER_URL = "amqplib://akorn:akorn@127.0.0.1/myvhost" #amqplib://akorn:akorn@ip-10-235-51-20:5672/myvhost"
+BROKER_URL = "amqplib://akorn:akorn@localhost/myvhost" #amqplib://akorn:akorn@ip-10-235-51-20:5672/myvhost"
 
 #BROKER_HOST = "PopeBook-Pro" #ip-10-235-51-20"
 #BROKER_PORT = 49724
