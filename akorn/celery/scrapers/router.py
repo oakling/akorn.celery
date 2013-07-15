@@ -4,15 +4,13 @@ import cookielib
 import pkgutil
 import urlparse
 from akorn.scrapers.journals import utils
-from akorn.scrapers.journals.utils import RedirectHandler, Ignore401Handler
-from akorn.scrapers.journals.utils import get_scrapers_folder
 from akorn.celery.couch import db_store, db_journals, db_scrapers
 
 def resolve_doi(doi):
   cookiejar = cookielib.CookieJar()
   req = urllib2.Request('http://dx.doi.org/' + doi, headers=utils.headers)
   urls = []
-  opener = urllib2.build_opener(Ignore401Handler(), RedirectHandler(urls),
+  opener = urllib2.build_opener(utils.Ignore401Handler(), utils.RedirectHandler(urls),
                                 urllib2.HTTPCookieProcessor(cookiejar))
   response = opener.open(req)
 
@@ -22,7 +20,7 @@ def resolve_url(url):
   cookiejar = cookielib.CookieJar()
   req = urllib2.Request(url, headers=utils.headers)
   urls = []
-  opener = urllib2.build_opener(Ignore401Handler(), RedirectHandler(urls),
+  opener = urllib2.build_opener(utils.Ignore401Handler(), utils.RedirectHandler(urls),
                                 urllib2.HTTPCookieProcessor(cookiejar))
   response = opener.open(req)
 
@@ -51,7 +49,7 @@ def discover_scrapers():
   scraper_modules = []
   scraper_domain_map = {}
 
-  d = get_scrapers_folder()
+  d = utils.get_scrapers_folder()
 
   for module_importer, name, ispkg in pkgutil.iter_modules([d,]):
     if not name.startswith('scrape_'):
