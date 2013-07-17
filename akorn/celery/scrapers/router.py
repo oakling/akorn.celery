@@ -1,10 +1,11 @@
-import sys, os
 import urllib2
 import cookielib
-import pkgutil
 import urlparse
-from akorn.scrapers.journals import utils
+from akorn.scrapers import utils, scrapers
 from akorn.celery.couch import db_store, db_journals, db_scrapers
+
+# TODO This should be instantiated by the task creation code
+scraper_factory = scrapers.Scrapers()
 
 def resolve_doi(doi):
   cookiejar = cookielib.CookieJar()
@@ -37,58 +38,6 @@ def resolve_journal(alias):
 
   return journal_id
 
-def load_module(module_path):
-    __import__(module_path)
-    return sys.modules[module_path]
-
-def discover_scrapers():
-  """
-    Use pkgutil to find scrapers in this module. Build a list of scrapers and which domains they map to.
-  """
-
-  scraper_modules = []
-  scraper_domain_map = {}
-
-  d = utils.get_scrapers_folder()
-
-  for module_importer, name, ispkg in pkgutil.iter_modules([d,]):
-    if not name.startswith('scrape_'):
-      continue
-    module = module_importer.find_module(name).load_module(name)
-
-    scraper_modules.append(module)
-
-    if hasattr(module, 'SCRAPER_DOMAINS'):
-      for domain in module.SCRAPER_DOMAINS:
-        scraper_domain_map[domain] = module
-
-  return (scraper_modules, scraper_domain_map)
-
-scraper_modules, scraper_domain_map = discover_scrapers()
-
-def get_domain(url):
-  url_parsed = urlparse.urlparse(url)
-  return url_parsed.netloc
-
-def resolve_scraper(url):
-  # Do it by domain for now. This might not always work, a full url prefix might be needed, but this is cheaper.
-
-  domain = get_domain(url)
-
-  if domain in scraper_domain_map:
-    scraper_module = scraper_domain_map[domain]
-  else:
-    url = resolve_url(url)
-    domain = get_domain(url)
-    if domain in scraper_domain_map:
-      scraper_module = scraper_domain_map[domain]
-    else:
-      scraper_module = load_module('scrape_meta_tags')
-
-  module_path = "akorn.scrapers.journals." + scraper_module.__name__
-
-  return module_path, scraper_module
-
 def resolve_and_scrape(url):
   """Scrape URL; handle any errors; return dictionary to be inserted
   into store."""
@@ -96,8 +45,22 @@ def resolve_and_scrape(url):
   module_path = "Unable to resolve"
   article={}
   try:
-    module_path, scraper_module = resolve_scraper(url)
-    article = scraper_module.scrape(url)
+    # lambda is used to make evaluation lazy, to avoid cost of resolve_url
+    to_try = [lambda: url, lambda: resolve_url(url)]
+    for attempt in to_try:
+      try:
+        # Attempt is a function, as lambda wraps each url in a function
+        module_path, scraper_method = scraper_factory.resolve_scraper(attempt())
+        break
+      except scrapers.ScraperNotFound:
+        # Then try to get the scraper with the next
+        continue
+    else:
+      # Use generic scraper
+      module_path, scraper_method = scraper_factory.generic_scraper()
+
+    # Use the scraper method returned to scrape the article
+    article = scraper_method(url)
 
     if 'journal' in article:
       journal_name = article['journal']
@@ -118,7 +81,7 @@ def resolve_and_scrape(url):
     article['error_text'] = str(e)
     article['source_urls'] = [url]
     article['rescrape'] = True
-    
-  article['scraper_module'] = module_path 
+
+  article['scraper_module'] = module_path
 
   return article
