@@ -1,11 +1,14 @@
-from celery.task import task
+from celery import Celery
 from akorn.celery.scrapers.tasks import scrape_journal
 import feed_handlers
 import feedparser
 
 from akorn.celery.couch import db_store
+from akorn.celery.celeryconfig import BROKER_URL, CELERY_RESULT_BACKEND
 
-@task
+app = Celery('feed_tasks', broker=BROKER_URL, backend=CELERY_RESULT_BACKEND)
+
+@app.task('fetch-feed')
 def fetch_feed(feedhandler, feed_urls):
     for feed_url in feed_urls:
         add_feed_items.delay(feedhandler, feed_url)
@@ -14,7 +17,7 @@ def fix_url(url):
   # Remove session key for wiley urls
   return url.split(';')[0]
 
-@task
+@app.task('add-feed-items')
 def add_feed_items(feedhandler, feed_url):
     """Add feed items to database.."""
 

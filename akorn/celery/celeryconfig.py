@@ -1,17 +1,7 @@
 from celery.schedules import crontab
 
-BROKER_URL = "amqplib://akorn:akorn@localhost/myvhost" #amqplib://akorn:akorn@ip-10-235-51-20:5672/myvhost"
-
-#BROKER_HOST = "PopeBook-Pro" #ip-10-235-51-20"
-#BROKER_PORT = 49724
-#BROKER_USER = "akorn"
-#BROKER_PASSWORD = "flout29&UFOs"
-#BROKER_VHOST = "myvhost"
-
+BROKER_URL = "pyamqp://akorn:akorn@localhost/myvhost"
 CELERY_RESULT_BACKEND = None
-
-#BROKER_URL = "couchdb://127.0.0.1:5984/celery"
-#CELERY_RESULT_BACKEND = 'couchdb'
 
 CELERY_IMPORTS = (
     "akorn.celery.scrapers.tasks",
