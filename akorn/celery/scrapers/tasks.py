@@ -1,6 +1,10 @@
+from celery import Celery
+
 from akorn.celery.couch import db_store
-from celery.task import task
-from router import resolve_and_scrape, resolve_doi
+from akorn.celery.scrapers.router import resolve_and_scrape, resolve_doi
+from akorn.celery.celeryconfig import BROKER_URL, CELERY_RESULT_BACKEND
+
+app = Celery('scraping_tasks', broker=BROKER_URL, backend=CELERY_RESULT_BACKEND)
 
 def resolve_merges():
     # TODO: At this stage, we check that our source doesn't have the same IDs as any other records.
@@ -16,14 +20,14 @@ def resolve_merges():
     #    pass
     pass 
 
-@task
+@app.task('rescrape-articles')
 def rescrape_articles():
   records = db_store.view('rescrape/rescrape', include_docs='true').rows
 
   for record in records:
     scrape_journal.delay(record.doc['source_url'], record.doc.id)
 
-@task
+@app.task('scrape-doi')
 def scrape_doi(doi, doc_id=None):
     records_doi = db_store.view('index/ids', key='doi:' + doi, include_docs='true').rows
 
@@ -74,7 +78,7 @@ def check_source(url):
   else:
     return False
 
-@task
+@app.task('scrape-journal')
 def scrape_journal(url, doc_id=None, base_article={}):
     """Find the paper in the database and then add or merge as
     necessary."""
