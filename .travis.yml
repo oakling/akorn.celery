@@ -9,4 +9,4 @@ install:
   - buildout init
   - buildout -c buildout/development.cfg
 script:
-  - bin/nose akorn.celery
+  - buildout/bin/nose akorn.celery
