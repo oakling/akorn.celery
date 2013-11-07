@@ -32,7 +32,15 @@ def add_feed_items(feedhandler, feed_url):
     for item in feed['items']:
         base_article = {}
 
-        item_url = item[feedhandler]
+        if type(feedhandler) is list:
+          for feedhandler_ in feedhandler:
+            if feedhandler_ in item:
+              item_url = item[feedhandler_]
+              break
+          else:
+            raise Exception("Feed tag(s) not valid.")
+        else:
+          item_url = item[feedhandler]
 
         check_exists = db_store.view('index/sources', key=item_url, include_docs='false')
 

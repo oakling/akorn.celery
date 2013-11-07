@@ -71,7 +71,7 @@ def scrape_doi(doi, doc_id=None):
     return doc_id
 
 def check_source(url):
-  rows = db_store.view('index/sources', key=url, include_docs='true').rows
+  rows = db_store.view('index/sources', key=url).rows
   
   if len(rows) == 0:
     return True

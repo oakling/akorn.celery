@@ -1,6 +1,8 @@
+import sys
 import urllib2
 import cookielib
 import urlparse
+import traceback
 from akorn.scrapers import utils, scrapers
 from akorn.celery.couch import db_store, db_journals, db_scrapers
 
@@ -37,6 +39,12 @@ def resolve_journal(alias):
     journal_id = None
 
   return journal_id
+
+def get_traceback():
+  ex_type, ex, tb = sys.exc_info()
+  s = traceback.format_tb(tb) 
+  del tb
+  return s  
 
 def resolve_and_scrape(url):
   """Scrape URL; handle any errors; return dictionary to be inserted
@@ -81,6 +89,7 @@ def resolve_and_scrape(url):
     article['error_text'] = str(e)
     article['source_urls'] = [url]
     article['rescrape'] = True
+    article['error_traceback'] = get_traceback()
 
   article['scraper_module'] = module_path
 
