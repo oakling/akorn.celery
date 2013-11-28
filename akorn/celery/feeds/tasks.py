@@ -1,5 +1,5 @@
 from celery import Celery
-from akorn.celery.scrapers.tasks import scrape_journal
+from akorn.celery.scrapers.tasks import scrape_journal, scrape_rss
 from akorn.scrapers import scrapers
 import feedparser
 
@@ -15,19 +15,21 @@ def fetch_feed(scraper_module=None):
     if scraper_module is not None:
         feedhandler, feed_urls = scraper_factory.feeds[scraper_module]
         for feed_url in feed_urls:
-            add_feed_items.delay(feedhandler, feed_url)
+            add_feed_items.delay(scraper_module, feedhandler, feed_url)
     else:
         for scraper_module, (feedhandler, feed_urls) in scraper_factory.feeds.items():
             for feed_url in feed_urls:
-                add_feed_items.delay(feedhandler, feed_url)
+                add_feed_items.delay(scraper_module, feedhandler, feed_url)
 
 
 @app.task('add-feed-items')
-def add_feed_items(feedhandler, feed_url):
+def add_feed_items(scraper_module, feedhandler, feed_url):
     """Add feed items to database.."""
 
     # should be smarter here, e.g. use If-Modified-Since
     feed = feedparser.parse(feed_url, agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/534.50 (KHTML, like Gecko) Version/5.1 Safari/534.50')
+
+    should_scrape = scraper_factory.should_scrape[scraper_module]
 
     for item in feed['items']:
         base_article = {}
@@ -50,5 +52,8 @@ def add_feed_items(feedhandler, feed_url):
           check_exists = db_store.view('index/sources', key=item_url, include_docs='false')
 
         if not check_exists.rows:
-          scrape_journal.delay(item_url, base_article=base_article)
-                             #handler['identifier'](item))
+          if should_scrape:
+            scrape_journal.delay(item_url, base_article=base_article)
+          else:
+            scrape_rss.delay(scraper_module, item)
+

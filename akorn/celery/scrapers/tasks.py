@@ -1,10 +1,13 @@
 from celery import Celery
 
+from akorn.scrapers.scrapers import Scrapers
 from akorn.celery.couch import db_store
-from akorn.celery.scrapers.router import resolve_and_scrape, resolve_doi
+from akorn.celery.scrapers.router import resolve_and_scrape, resolve_doi, resolve_journal
 from akorn.celery.celeryconfig import BROKER_URL, CELERY_RESULT_BACKEND
 
 app = Celery('scraping_tasks', broker=BROKER_URL, backend=CELERY_RESULT_BACKEND)
+
+scrapers = Scrapers()
 
 def resolve_merges():
     # TODO: At this stage, we check that our source doesn't have the same IDs as any other records.
@@ -77,6 +80,24 @@ def check_source(url):
     return True
   else:
     return False
+
+@app.task('scrape-rss')
+def scrape_rss(scraper_module, item):
+  s = scrapers.module_names[scraper_module]
+  d = s.scrape_rss(item)
+
+  if 'journal' in d:
+    d['journal_id'] = resolve_journal(d['journal'])
+
+  if check_source(d['source_urls'][0]):
+    doc_id, _ = db_store.save(d)
+  else:
+    print "Already got this one"
+    rows = db_store.view('index/sources', key=d['source_urls'][0], include_docs='true').rows
+    article = rows[0].doc
+    doc_id = article.id
+
+  return doc_id
 
 @app.task('scrape-journal')
 def scrape_journal(url, doc_id=None, base_article={}):
