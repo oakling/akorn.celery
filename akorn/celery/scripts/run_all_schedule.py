@@ -1,4 +1,5 @@
 from akorn.celery.feeds import tasks
 
-tasks.delay.fetch_feed()
+def main():
+  tasks.fetch_feed.delay()
 
